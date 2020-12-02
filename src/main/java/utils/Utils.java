@@ -75,7 +75,7 @@ public class Utils
         });
     }
     
-    public static <T> Map<String, String> extractRegex(String input, String regex, Class clazz)
+    public static <T> Map<String, String> extractRegex(String input, String regex, Class<T> clazz)
     {
         String[] params = Arrays.stream(clazz.getDeclaredFields())
                                 .filter(a -> !Modifier.isStatic(a.getModifiers()))
@@ -97,6 +97,12 @@ public class Utils
         return Arrays.stream(numbers)
                      .min()
                      .orElse(Integer.MAX_VALUE);
+    }
+    
+    @SafeVarargs
+    public static <T> long countTrue(T value, Predicate<T>... tests)
+    {
+        return Arrays.stream(tests).filter(p -> p.test(value)).count();
     }
     
     public static int max(int... numbers)
