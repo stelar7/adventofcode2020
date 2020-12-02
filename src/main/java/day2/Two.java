@@ -7,23 +7,24 @@ public class Two
 {
     public static void main(String[] args)
     {
+        String regex = "(?<min>\\d*)-(?<max>\\d*) (?<letter>.): (?<word>.*)";
+        
         long inputs = StringFromFileSupplier.create("day2.input", false)
                                             .getDataSource()
                                             .stream()
+                                            .map(line -> Utils.extractRegex(line, regex))
                                             .filter(line -> {
-                                                String[] split        = line.split(": ");
-                                                String   precondition = split[0];
-                                                char     letter       = precondition.split(" ")[1].toCharArray()[0];
-                                                String   minMax       = precondition.split(" ")[0];
-                                                int      indexOne     = Integer.parseInt(minMax.split("-")[0]);
-                                                int      indexTwo     = Integer.parseInt(minMax.split("-")[1]);
-                                                String   word         = split[1];
+                                                int    indexOne = Integer.parseInt(line.get("min")) - 1;
+                                                int    indexTwo = Integer.parseInt(line.get("max")) - 1;
+                                                char   letter   = line.get("letter").toCharArray()[0];
+                                                String word     = line.get("word");
             
-                                                return Utils.countTrue(
-                                                        word,
-                                                        w -> w.charAt(indexOne - 1) == letter,
-                                                        w -> w.charAt(indexTwo - 1) == letter
-                                                                      ) == 1;
+                                                long matchCount = Utils.countTrue(word,
+                                                                                  w -> w.charAt(indexOne) == letter,
+                                                                                  w -> w.charAt(indexTwo) == letter
+                                                                                 );
+            
+                                                return matchCount == 1;
                                             }).count();
         
         System.out.println(inputs);

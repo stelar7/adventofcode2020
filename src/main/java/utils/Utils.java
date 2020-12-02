@@ -27,6 +27,20 @@ public class Utils
             System.out.println(input);
         }
         
+        if (vars.length == 0)
+        {
+            try
+            {
+                final Field namedGroups = p.getClass().getDeclaredField("namedGroups");
+                namedGroups.setAccessible(true);
+                final Map<String, Integer> nameToGroupIndex = (Map<String, Integer>) namedGroups.get(p);
+                nameToGroupIndex.forEach((k, v) -> matches.put(k, m.group(v)));
+            } catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        
         Arrays.stream(vars).forEach(v -> matches.put(v, m.group(v)));
         
         return matches;
