@@ -119,6 +119,19 @@ public class Utils
         return Arrays.stream(tests).filter(p -> p.test(value)).count();
     }
     
+    @SafeVarargs
+    public static <T> boolean allTrue(T value, Predicate<T>... tests)
+    {
+        for (Predicate<T> test : tests)
+        {
+            if (!test.test(value))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public static int max(int... numbers)
     {
         return Arrays.stream(numbers)

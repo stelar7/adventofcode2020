@@ -1,8 +1,11 @@
 package day4;
 
+import utils.Utils;
 import utils.sources.StringFromFileSupplier;
 
-import java.util.List;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class One
 {
@@ -11,44 +14,41 @@ public class One
         List<String> inputs = StringFromFileSupplier.create("day4.input", false)
                                                     .getDataSource();
         
-        inputs.add("");
+        List<Map<String, String>> passports = generatePassportStrings(inputs);
+        
+        long count = passports.stream()
+                              .filter(m -> Utils.intersection(m.keySet(), List.of("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")).size() == 7)
+                              .count();
+        
+        
+        System.out.println(count);
+    }
+    
+    public static List<Map<String, String>> generatePassportStrings(List<String> inputs)
+    {
+        List<Map<String, String>> out = new ArrayList<>();
         
         StringBuilder currentPassport = new StringBuilder();
-        int           score           = 0;
         for (String currentLine : inputs)
         {
             currentPassport.append(currentLine).append(" ");
-        
+            
             if (currentLine.isBlank())
             {
-                if (checkIfValid(currentPassport.toString()))
-                {
-                    score++;
-                }
+                out.add(transformToMap(currentPassport.toString()));
                 currentPassport = new StringBuilder();
             }
         }
+        out.add(transformToMap(currentPassport.toString()));
         
-        System.out.println(score);
+        return out;
     }
     
-    private static boolean checkIfValid(String data)
+    private static Map<String, String> transformToMap(String data)
     {
-        if (data.matches(".*byr:.*[\\n\\r\\s]")) {
-            if (data.matches(".*iyr:.*[\\n\\r\\s]")) {
-                if (data.matches(".*eyr:.*[\\n\\r\\s]")) {
-                    if (data.matches(".*hgt:.*[\\n\\r\\s]")) {
-                        if (data.matches(".*hcl:.*[\\n\\r\\s]")) {
-                            if (data.matches(".*ecl:.*[\\n\\r\\s]")) {
-                                if (data.matches(".*pid:.*[\\n\\r\\s]")) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return Arrays.stream(data.split(" "))
+                     .map(word -> Map.of(word.split(":")[0], word.split(":")[1]))
+                     .flatMap(m -> m.entrySet().stream())
+                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 }
