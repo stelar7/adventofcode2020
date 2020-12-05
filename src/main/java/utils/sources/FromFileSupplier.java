@@ -8,9 +8,9 @@ import java.util.stream.*;
 
 public class FromFileSupplier<T> implements Supplier<T>, SourceSupplier<T>
 {
-    private List<T> data;
-    private int     index = 0;
-    private boolean repeating;
+    private final List<T> data;
+    private       int     index = 0;
+    private final boolean repeating;
     
     public FromFileSupplier(List<T> values, boolean repeating)
     {
@@ -63,6 +63,11 @@ public class FromFileSupplier<T> implements Supplier<T>, SourceSupplier<T>
     public T asString()
     {
         return data.get(0);
+    }
+    
+    public String toString()
+    {
+        return data.stream().map(a -> (String) a).collect(Collectors.joining("\n"));
     }
     
     @Override
