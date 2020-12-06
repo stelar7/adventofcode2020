@@ -156,6 +156,27 @@ public class Utils
         return result;
     }
     
+    public static int[] arrayDivide(int[] a, int value)
+    {
+        for (int i = 0; i < a.length; i++)
+        {
+            a[i] /= value;
+        }
+        
+        return a;
+    }
+    
+    
+    public static int[] arrayMergeAddByIndex(int[] a, int[] b)
+    {
+        for (int i = 0; i < a.length; i++)
+        {
+            a[i] += b[i];
+        }
+        
+        return a;
+    }
+    
     
     public static int[] letterCount(String a)
     {
