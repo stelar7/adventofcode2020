@@ -106,12 +106,6 @@ public class Utils
         return new BufferedReader(new InputStreamReader(file)).lines().collect(Collectors.joining("\n"));
     }
     
-    public static int min(int... numbers)
-    {
-        return Arrays.stream(numbers)
-                     .min()
-                     .orElse(Integer.MAX_VALUE);
-    }
     
     @SafeVarargs
     public static <T> long countTrue(T value, Predicate<T>... tests)
@@ -137,6 +131,27 @@ public class Utils
         return Arrays.stream(numbers)
                      .max()
                      .orElse(Integer.MIN_VALUE);
+    }
+    
+    public static int min(int... numbers)
+    {
+        return Arrays.stream(numbers)
+                     .min()
+                     .orElse(Integer.MAX_VALUE);
+    }
+    
+    public static long max(long... numbers)
+    {
+        return Arrays.stream(numbers)
+                     .max()
+                     .orElse(Long.MIN_VALUE);
+    }
+    
+    public static long min(long... numbers)
+    {
+        return Arrays.stream(numbers)
+                     .min()
+                     .orElse(Long.MAX_VALUE);
     }
     
     public static int sum(int... numbers)
