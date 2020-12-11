@@ -558,47 +558,137 @@ public class Utils
     
     public static Map<Vector2i, Long> findClosestNodes8(Map<Vector2i, Long> grid, Vector2i center, List<Long> values)
     {
-        Map<Vector2i, Pair<Vector2i, Long>> directions  = new HashMap<>();
-        Rectanglei                          boundingBox = Utils.findBoundingBox(grid.keySet());
-        for (int y = -boundingBox.maxY; y < boundingBox.maxY; y++)
+        Map<Vector2i, Long> nearby      = new HashMap<>();
+        Rectanglei          boundingBox = Utils.findBoundingBox(grid.keySet());
+        
+        for (int x = 1; x < boundingBox.maxX; x++)
         {
-            for (int x = -boundingBox.maxX; x < boundingBox.maxX; x++)
+            Vector2i test  = center.add(x, 0, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
             {
-                if (x == 0 && y == 0)
-                {
-                    continue;
-                }
-                
-                if (!(Math.abs(x) > 0 && y == 0 || Math.abs(y) > 0 && x == 0 || Math.abs(x) == Math.abs(y)))
-                {
-                    continue;
-                }
-                
-                Vector2i test   = center.add(x, y, new Vector2i());
-                long     gotten = grid.getOrDefault(test, -1L);
-                if (!values.contains(gotten))
-                {
-                    continue;
-                }
-                
-                
-                Vector2i unit = new Vector2i(x / (x != 0 ? Math.abs(x) : 1), y / (y != 0 ? Math.abs(y) : 1));
-                directions.compute(unit, (k, v) -> {
-                    if (v != null && v.getA().distance(center) < test.distance(center))
-                    {
-                        return v;
-                    }
-                    return new Pair<>(test, gotten);
-                });
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
             }
         }
         
-        Map<Vector2i, Long> nearby = new HashMap<>();
+        for (int x = -1; x > -boundingBox.maxX; x--)
+        {
+            Vector2i test  = center.add(x, 0, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
         
-        directions.forEach((k, v) -> {
-            nearby.put(v.getA(), v.getB());
-        });
+        for (int y = 1; y < boundingBox.maxY; y++)
+        {
+            Vector2i test  = center.add(0, y, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
         
+        for (int y = -1; y > -boundingBox.maxY; y--)
+        {
+            Vector2i test  = center.add(0, y, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
+        
+        
+        for (int i = 1; i < Math.max(boundingBox.maxX, boundingBox.maxY); i++)
+        {
+            Vector2i test  = center.add(i, i, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
+        
+        for (int i = 1; i < Math.max(boundingBox.maxX, boundingBox.maxY); i++)
+        {
+            Vector2i test  = center.add(-i, i, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
+        
+        for (int i = 1; i < Math.max(boundingBox.maxX, boundingBox.maxY); i++)
+        {
+            Vector2i test  = center.add(i, -i, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
+        
+        for (int i = 1; i < Math.max(boundingBox.maxX, boundingBox.maxY); i++)
+        {
+            Vector2i test  = center.add(-i, -i, new Vector2i());
+            long     value = grid.getOrDefault(test, -1L);
+            if (value == -1L)
+            {
+                break;
+            }
+            
+            if (values.contains(value))
+            {
+                nearby.put(test, value);
+                break;
+            }
+        }
         return nearby;
     }
     
@@ -703,12 +793,48 @@ public class Utils
         return grid;
     }
     
+    public static List<Cell> parseGridToCells(List<String> input, List<Long> states, List<Long> validNeighbours)
+    {
+        List<Cell> cells = new ArrayList<>();
+        
+        AtomicInteger x = new AtomicInteger();
+        AtomicInteger y = new AtomicInteger();
+        for (String line : input)
+        {
+            line.chars().forEach(c -> {
+                Vector2i location = new Vector2i(x.get(), y.get());
+                long     state    = (long) c;
+                
+                cells.add(new Cell(location, state));
+                x.getAndIncrement();
+            });
+            x.set(0);
+            y.getAndIncrement();
+        }
+        
+        cells.forEach(cell -> {
+            cell.setStates(states);
+            
+            Map<Vector2i, Long> closest8Nodes = Utils.findClosestNodes8(Utils.parseGrid(input), cell.getLocation(), validNeighbours);
+            cell.setNeighbours(new ArrayList<>(closest8Nodes.keySet()));
+        });
+        
+        return cells;
+    }
+    
     public static Long countGrid(Map<Vector2i, Long> grid, long item)
     {
         AtomicLong value = new AtomicLong();
         
         grid.forEach((k, v) -> value.addAndGet(v == item ? 1 : 0));
         
+        return value.get();
+    }
+    
+    public static Long countCellStates(List<Cell> cells, long item)
+    {
+        AtomicLong value = new AtomicLong();
+        cells.forEach(entry -> value.addAndGet(entry.getState() == item ? 1 : 0));
         return value.get();
     }
     
