@@ -324,7 +324,7 @@ public class Utils
         return highestIndex;
     }
     
-    public static Rectanglef findBoundingBox(Collection<Vector2i> keys)
+    public static Rectanglei findBoundingBox(Collection<Vector2i> keys)
     {
         int minx = keys.stream().min(Comparator.comparingInt(v -> v.x)).get().x;
         int maxx = keys.stream().max(Comparator.comparingInt(v -> v.x)).get().x;
@@ -332,7 +332,18 @@ public class Utils
         int miny = keys.stream().min(Comparator.comparingInt(v -> v.y)).get().y;
         int maxy = keys.stream().max(Comparator.comparingInt(v -> v.y)).get().y;
         
-        return new Rectanglef(minx, miny, maxx, maxy);
+        return new Rectanglei(minx, miny, maxx, maxy);
+    }
+    
+    private static Rectanglei findBoundingBoxCentered(Set<Vector2i> keys, Vector2i center)
+    {
+        int minx = keys.stream().min(Comparator.comparingInt(v -> v.x)).get().x + center.x;
+        int maxx = keys.stream().max(Comparator.comparingInt(v -> v.x)).get().x - center.x;
+        
+        int miny = keys.stream().min(Comparator.comparingInt(v -> v.y)).get().y + center.y;
+        int maxy = keys.stream().max(Comparator.comparingInt(v -> v.y)).get().y - center.y;
+        
+        return new Rectanglei(minx, miny, maxx, maxy);
     }
     
     public static String getBlockCharIfTrue(boolean predicate)
@@ -403,10 +414,10 @@ public class Utils
     
     public static void drawGrid(Map<Vector2i, Long> tiles, Map<Long, String> images)
     {
-        Rectanglef rect = Utils.findBoundingBox(tiles.keySet());
-        for (int i = (int) rect.minY; i <= rect.maxY; i++)
+        Rectanglei rect = Utils.findBoundingBox(tiles.keySet());
+        for (int i = rect.minY; i <= rect.maxY; i++)
         {
-            for (int j = (int) rect.minX; j <= rect.maxX; j++)
+            for (int j = rect.minX; j <= rect.maxX; j++)
             {
                 long   color   = tiles.getOrDefault(new Vector2i(j, i), 0L);
                 String locChar = images.get(color);
@@ -419,10 +430,10 @@ public class Utils
     
     public static void drawGridValues(Map<Vector2i, Long> tiles)
     {
-        Rectanglef rect = Utils.findBoundingBox(tiles.keySet());
-        for (int i = (int) rect.minY; i <= rect.maxY; i++)
+        Rectanglei rect = Utils.findBoundingBox(tiles.keySet());
+        for (int i = rect.minY; i <= rect.maxY; i++)
         {
-            for (int j = (int) rect.minX; j <= rect.maxX; j++)
+            for (int j = rect.minX; j <= rect.maxX; j++)
             {
                 System.out.print(tiles.getOrDefault(new Vector2i(j, i), -1L) + " ");
             }
@@ -495,10 +506,10 @@ public class Utils
         List<VectorNode>       longest     = null;
         int                    max         = Integer.MIN_VALUE;
         Map<Vector2i, Integer> distanceMap = new HashMap<>();
-        Rectanglef             boundingBox = Utils.findBoundingBox(map.keySet());
-        for (int i = (int) boundingBox.minY; i < boundingBox.maxY; i++)
+        Rectanglei             boundingBox = Utils.findBoundingBox(map.keySet());
+        for (int i = boundingBox.minY; i < boundingBox.maxY; i++)
         {
-            for (int j = (int) boundingBox.minX; j < boundingBox.maxX; j++)
+            for (int j = boundingBox.minX; j < boundingBox.maxX; j++)
             {
                 Vector2i check = new Vector2i(j, i);
                 long     type  = map.getOrDefault(check, 0L);
@@ -543,6 +554,59 @@ public class Utils
             tiles.put((long) i, Character.toString((char) i));
         }
         return tiles;
+    }
+    
+    public static Map<Vector2i, Long> findClosestNodes8(Map<Vector2i, Long> grid, Vector2i center, List<Long> values)
+    {
+        Map<Vector2i, Pair<Vector2i, Long>> directions  = new HashMap<>();
+        Rectanglei                          boundingBox = Utils.findBoundingBox(grid.keySet());
+        for (int y = -boundingBox.maxY; y < boundingBox.maxY; y++)
+        {
+            for (int x = -boundingBox.maxX; x < boundingBox.maxX; x++)
+            {
+                if (x == 0 && y == 0)
+                {
+                    continue;
+                }
+                
+                if (!(Math.abs(x) > 0 && y == 0 || Math.abs(y) > 0 && x == 0 || Math.abs(x) == Math.abs(y)))
+                {
+                    continue;
+                }
+                
+                Vector2i test   = center.add(x, y, new Vector2i());
+                long     gotten = grid.getOrDefault(test, -1L);
+                if (!values.contains(gotten))
+                {
+                    continue;
+                }
+                
+                
+                Vector2i unit = new Vector2i(x / (x != 0 ? Math.abs(x) : 1), y / (y != 0 ? Math.abs(y) : 1));
+                directions.compute(unit, (k, v) -> {
+                    if (v != null && v.getA().distance(center) < test.distance(center))
+                    {
+                        return v;
+                    }
+                    return new Pair<>(test, gotten);
+                });
+            }
+        }
+        
+        Map<Vector2i, Long> nearby = new HashMap<>();
+        
+        directions.forEach((k, v) -> {
+            nearby.put(v.getA(), v.getB());
+        });
+        
+        return nearby;
+    }
+    
+    public String getClosestCardinalDirection(double input)
+    {
+        String[] directions = {"N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"};
+        int      index      = (int) Math.floor(((input - 22.5) % 360) / 45);
+        return directions[index + 1];
     }
     
     public static Set<Vector2i> findNeighbourNodes8(Map<Vector2i, Long> grid, Vector2i center, long value)
@@ -637,6 +701,15 @@ public class Utils
         }
         
         return grid;
+    }
+    
+    public static Long countGrid(Map<Vector2i, Long> grid, long item)
+    {
+        AtomicLong value = new AtomicLong();
+        
+        grid.forEach((k, v) -> value.addAndGet(v == item ? 1 : 0));
+        
+        return value.get();
     }
     
     public static <T> boolean containsEqualElementsInOrder(List<T> list)
