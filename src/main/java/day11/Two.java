@@ -10,7 +10,6 @@ public class Two
 {
     public static void main(String[] args)
     {
-        long start = System.currentTimeMillis();
         List<String> input = StringFromFileSupplier.create("day11.input", false)
                                                    .getDataSource();
         
@@ -22,7 +21,6 @@ public class Two
             if (current.equals(last))
             {
                 System.out.println(Utils.countGrid(current, 35L));
-                System.out.println(System.currentTimeMillis() - start);
                 return;
             }
             last = current;
