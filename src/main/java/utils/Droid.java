@@ -48,6 +48,29 @@ public class Droid
         }
     }
     
+    public void move(Direction dir, int count)
+    {
+        Direction current = this.direction;
+        
+        if (dir != Direction.FORWARD && dir != Direction.BACKWARD)
+        {
+            turn(dir);
+        }
+        
+        for (int i = 0; i < count; i++)
+        {
+            step();
+        }
+        
+        turn(current);
+    }
+    
+    public void moveByVector(Vector2i position)
+    {
+        this.x += position.x;
+        this.y += position.y;
+    }
+    
     public void turnLeft()
     {
         this.direction = direction.left();
@@ -58,22 +81,30 @@ public class Droid
         this.direction = direction.right();
     }
     
+    @SuppressWarnings("SuspiciousNameCombination")
+    public void rotateLeftAboutZero()
+    {
+        int temp = this.x;
+        this.x = this.y;
+        this.y = -temp;
+    }
+    
+    @SuppressWarnings("SuspiciousNameCombination")
+    public void rotateRightAboutZero()
+    {
+        int temp = this.y;
+        this.y = this.x;
+        this.x = -temp;
+    }
+    
     public void step()
     {
         switch (direction)
         {
-            case NORTH:
-                y--;
-                break;
-            case SOUTH:
-                y++;
-                break;
-            case WEST:
-                x--;
-                break;
-            case EAST:
-                x++;
-                break;
+            case NORTH -> y--;
+            case SOUTH -> y++;
+            case WEST -> x--;
+            case EAST -> x++;
         }
     }
     
