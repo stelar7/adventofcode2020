@@ -1008,19 +1008,19 @@ public class Utils
     
     public static long chineseRemainder(List<Integer> negativeIndex, List<Integer> modulo)
     {
-        List<BigInteger> A = index.stream().map(BigInteger::valueOf).collect(Collectors.toList());
+        List<BigInteger> A = negativeIndex.stream().map(BigInteger::valueOf).collect(Collectors.toList());
         List<BigInteger> Q = modulo.stream().map(BigInteger::valueOf).collect(Collectors.toList());
         
         BigInteger p, tmp;
         BigInteger prod = BigInteger.ONE;
         BigInteger sum  = BigInteger.ZERO;
         
-        for (int i = 0; i < index.size(); i++)
+        for (int i = 0; i < negativeIndex.size(); i++)
         {
             prod = prod.multiply(Q.get(i));
         }
         
-        for (int i = 0; i < index.size(); i++)
+        for (int i = 0; i < negativeIndex.size(); i++)
         {
             p = prod.divide(Q.get(i));
             tmp = extendedEuclideanAlgortihm(p, Q.get(i));
