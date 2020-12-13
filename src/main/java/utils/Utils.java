@@ -6,6 +6,7 @@ import utils.pathfinding.*;
 import java.io.*;
 import java.lang.Math;
 import java.lang.reflect.*;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -1004,4 +1005,59 @@ public class Utils
         
         return list.get(list.size() - 1);
     }
+    
+    public static long chineseRemainder(List<Integer> negativeIndex, List<Integer> modulo)
+    {
+        List<BigInteger> A = index.stream().map(BigInteger::valueOf).collect(Collectors.toList());
+        List<BigInteger> Q = modulo.stream().map(BigInteger::valueOf).collect(Collectors.toList());
+        
+        BigInteger p, tmp;
+        BigInteger prod = BigInteger.ONE;
+        BigInteger sum  = BigInteger.ZERO;
+        
+        for (int i = 0; i < index.size(); i++)
+        {
+            prod = prod.multiply(Q.get(i));
+        }
+        
+        for (int i = 0; i < index.size(); i++)
+        {
+            p = prod.divide(Q.get(i));
+            tmp = extendedEuclideanAlgortihm(p, Q.get(i));
+            sum = sum.add(A.get(i).multiply(tmp).multiply(p));
+        }
+        
+        return sum.mod(prod).longValue();
+    }
+    
+    public static BigInteger extendedEuclideanAlgortihm(BigInteger p, BigInteger q)
+    {
+        BigInteger s     = new BigInteger("0");
+        BigInteger s_old = new BigInteger("1");
+        BigInteger t     = new BigInteger("1");
+        BigInteger t_old = new BigInteger("0");
+        BigInteger r     = q;
+        BigInteger r_old = p;
+        BigInteger tmp;
+        
+        while (r.compareTo(BigInteger.valueOf(0)) != 0)
+        {
+            BigInteger quotient = r_old.divide(r);
+            
+            tmp = r;
+            r = r_old.subtract(quotient.multiply(r));
+            r_old = tmp;
+            
+            tmp = s;
+            s = s_old.subtract(quotient.multiply(s));
+            s_old = tmp;
+            
+            tmp = t;
+            t = t_old.subtract(quotient.multiply(t));
+            t_old = tmp;
+        }
+        
+        return s_old;
+    }
+    
 }
