@@ -32,9 +32,9 @@ public class FromStringSupplier<T> implements Supplier<T>, SourceSupplier<T>
                           .collect(Collectors.toList());
     }
     
-    public static <T> FromStringSupplier createFromArray(String inputString, Function<String, List<T>> mapping, boolean repeating)
+    public static <T> FromStringSupplier<T> createFromArray(String inputString, Function<String, List<T>> mapping, boolean repeating)
     {
-        return new FromStringSupplier(
+        return new FromStringSupplier<T>(
                 Arrays.stream(inputString.split("\n"))
                       .flatMap(a -> Stream.of(mapping.apply(a)))
                       .flatMap(Collection::stream)
@@ -42,14 +42,14 @@ public class FromStringSupplier<T> implements Supplier<T>, SourceSupplier<T>
                 repeating);
     }
     
-    public static <T> FromStringSupplier create(String inputFile, String separator, Function<String, T> mapping, boolean infinite)
+    public static <T> FromStringSupplier<T> create(String inputFile, String separator, Function<String, T> mapping, boolean infinite)
     {
-        return new FromStringSupplier(inputFile, separator, mapping, infinite);
+        return new FromStringSupplier<T>(inputFile, separator, mapping, infinite);
     }
     
-    public static <T> FromStringSupplier create(String inputFile, Function<String, T> mapping, boolean infinite)
+    public static <T> FromStringSupplier<T> create(String inputFile, Function<String, T> mapping, boolean infinite)
     {
-        return new FromStringSupplier(inputFile, mapping, infinite);
+        return new FromStringSupplier<T>(inputFile, mapping, infinite);
     }
     
     @Override

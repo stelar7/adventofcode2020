@@ -60,7 +60,7 @@ public class FromFileSupplier<T> implements Supplier<T>, SourceSupplier<T>
         return data;
     }
     
-    public T asString()
+    public T firstLineAsString()
     {
         return data.get(0);
     }

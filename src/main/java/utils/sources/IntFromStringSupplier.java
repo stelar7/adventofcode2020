@@ -36,13 +36,13 @@ public class IntFromStringSupplier extends FromStringSupplier<Integer>
         return new IntFromStringSupplier(inputFile, infinite);
     }
     
-    public static <T> Supplier createFromCommaString(String inputFile, boolean infinite)
+    public static <T> FromStringSupplier<T> createFromCommaString(String inputFile, boolean infinite)
     {
-        return FromStringSupplier.<T>createFromArray(inputFile, s -> Arrays.stream(s.split(",")).filter(a -> !a.isEmpty()).map(Integer::parseInt).map(a -> (T) a).collect(Collectors.toList()), infinite);
+        return FromStringSupplier.createFromArray(inputFile, s -> Arrays.stream(s.split(",")).filter(a -> !a.isEmpty()).map(Integer::parseInt).map(a -> (T) a).collect(Collectors.toList()), infinite);
     }
     
-    public static <T> Supplier longCreateFromCommaFile(String inputFile, boolean infinite)
+    public static <T> FromStringSupplier<T> longCreateFromCommaFile(String inputFile, boolean infinite)
     {
-        return FromStringSupplier.<T>createFromArray(inputFile, s -> Arrays.stream(s.split(",")).filter(a -> !a.isEmpty()).map(Long::parseLong).map(a -> (T) a).collect(Collectors.toList()), infinite);
+        return FromStringSupplier.createFromArray(inputFile, s -> Arrays.stream(s.split(",")).filter(a -> !a.isEmpty()).map(Long::parseLong).map(a -> (T) a).collect(Collectors.toList()), infinite);
     }
 }
